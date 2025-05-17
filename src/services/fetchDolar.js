@@ -3,7 +3,7 @@
 // {"compra": 0,"venta": 0,"casa": "string","nombre": "string","moneda": "string","fechaActualizacion": "string"}
 
 
-export const fetchDolar = async (type="oficial") => {
+export const fetchDolar = async (type = "oficial") => {
 
     const url = `https://dolarapi.com/v1/dolares/${type}`
 
@@ -15,8 +15,8 @@ export const fetchDolar = async (type="oficial") => {
             throw new Error(`Error: ${response.status} ${response.statusText}`);
         }
         const data = await response.json()
-        return data 
-    }catch (error) {
+        return data
+    } catch (error) {
         throw new Error(`Error fetching data: ${error.message}`);
     }
 
