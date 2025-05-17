@@ -6,6 +6,7 @@ const Dolar = () => {
   const [dolar, setDolar] = useState(null);
   const [estado, setEstado] = useState("Cambiar");
   const [value, setValue] = useState("");
+  const [cantDolar, setCantDolar] = useState(1)
 
   useEffect(() => {
     fetchData();
@@ -14,13 +15,13 @@ const Dolar = () => {
   }, []);
 
   useEffect(() => {
-    // console.log ( value)
+    // console.log(value)
   }, [value]);
 
   const fetchData = async () => {
     try {
       const data = await fetchDolar();
-      setDolar(data.venta);
+      setDolar(data.venta); // <- está bien pisar el valor de setDolar?
       localStorage.setItem("dolar", data.venta);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -29,16 +30,23 @@ const Dolar = () => {
 
   const cambiarEstado = () => {
     if (estado === "Cambiar") {
+      const multiplicador = parseFloat(value)
+      if (!isNaN(multiplicador) && dolar) { // <- quitar el isNaN si después controlamos el valor del input de otra manera
+        const nuevoValorDolar = dolar * multiplicador
+        setDolar(nuevoValorDolar)
+        setCantDolar(value)
+        localStorage.setItem("dolar", nuevoValorDolar)
+      }
+
       setEstado("Restaurar");
-      setDolar(value);
-      localStorage.setItem("dolar", value);
       setValue("");
-    }
-    if (estado === "Restaurar") {
+    } else if (estado === "Restaurar") {
       setEstado("Cambiar");
       fetchData();
+      setCantDolar(1)
     }
   };
+
 
   return (
     <div className="bg-green-600 text-white w-50">
@@ -50,7 +58,7 @@ const Dolar = () => {
         <div className="">
           {dolar ? (
             <h3 className="">
-              USD $ 1 = ARS ${Math.round(dolar).toLocaleString("es-AR")}
+              USD $ {cantDolar} = ARS ${Math.round(dolar).toLocaleString("es-AR")}
             </h3>
           ) : (
             <h3 className="text-slate-400">Cargando...</h3>
@@ -64,25 +72,26 @@ const Dolar = () => {
             onChange={(e) => setValue(e.target.value)}
           />
         </div>
-       <div className="hover:bg-green-900 ">
-  {estado === "Restaurar" ? (
-    <button
-      className="hover:cursor-pointer w-full"
-      onClick={cambiarEstado}
-    >
-      Restaurar
-    </button>
-  ) : value !== "" ? (
-    <button
-      className="hover:cursor-pointer w-full"
-      onClick={cambiarEstado}
-    >
-      Cambiar
-    </button>
-  ) : null}
-</div>
+        <div className="hover:bg-green-900 ">
+          {estado === "Restaurar" ? (
+            <button
+              className="hover:cursor-pointer w-full"
+              onClick={cambiarEstado}
+            >
+              Restaurar
+            </button>
+          ) : value !== "" ? (
+            <button
+              className="hover:cursor-pointer w-full"
+              onClick={cambiarEstado}
+            >
+              Cambiar
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>
   );
 };
+
 export default Dolar;
