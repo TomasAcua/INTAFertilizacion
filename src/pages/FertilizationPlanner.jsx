@@ -13,15 +13,16 @@ import {
 } from 'chart.js';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import { autoTable }from 'jspdf-autotable';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
 const FertilizationPlanner = () => {
   // Estado para manejar múltiples productos dentro de un plan (array de objetos)
   const [productForms, setProductForms] = useState([
-    { id: 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', costo: '' }
+    { id: 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', tratamientos: '', costo: '' }
   ]);
-  
+
   // Estado para almacenar todos los planes con detalles de productos
   const [plans, setPlans] = useState([]);
 
@@ -33,13 +34,34 @@ const FertilizationPlanner = () => {
 
   // Añadir nuevo producto al formulario actual
   const handleAddProductForm = () => {
-    setProductForms([...productForms, { id: productForms.length + 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', costo: '' }]);
+    setProductForms([...productForms, { id: productForms.length + 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', tratamientos: '', costo: '' }]);
   };
 
   // Maneja el cambio de cada input en los productos cargados
   const handleInputChange = (id, field, value) => {
     const updatedForms = productForms.map(p => {
       if (p.id === id) {
+        // Calcular costo si dosis, precio y tratamientos están completos
+        switch(field){
+          case 'dosis':
+            if (value !== '' && p.precio !== '' && p.tratamientos !== '') {
+              const costo = (parseFloat(value) * parseFloat(p.precio) * parseFloat(p.tratamientos)).toFixed(2);
+              return { ...p, [field]: value, costo };
+            }
+            break;
+          case 'precio':
+            if (value !== '' && p.dosis !== '' && p.tratamientos !== '') {
+              const costo = (parseFloat(p.dosis) * parseFloat(value) * parseFloat(p.tratamientos)).toFixed(2);
+              return { ...p, [field]: value, costo };
+            }
+            break;
+          case 'tratamientos':
+            if (value !== '' && p.dosis !== '' && p.precio !== '') {
+              const costo = (parseFloat(p.dosis) * parseFloat(p.precio) * parseFloat(value)).toFixed(2);
+              return { ...p, [field]: value, costo };
+            }
+            break;
+        }
         return { ...p, [field]: value };
       }
       return p;
@@ -49,7 +71,7 @@ const FertilizationPlanner = () => {
 
   // Validar que todos los campos estén completos antes de cargar plan
   const isCurrentPlanValid = () => {
-    return productForms.every(product => 
+    return productForms.every(product =>
       Object.values(product).every(val => val !== '' && val !== null)
     );
   };
@@ -62,13 +84,14 @@ const FertilizationPlanner = () => {
     }
     const nuevoPlan = {
       nombre: `Plan ${String.fromCharCode(65 + plans.length)}`,
-      productos: productForms.map(({ id, ...rest }) => rest)
+      productos: productForms.map(({ id, ...rest }) => rest),
+      total: productForms.reduce((acc, prod) => acc + parseFloat(prod.costo), 0)
     };
 
     setPlans([...plans, nuevoPlan]);
     setShowForm(false);
     // Reiniciar formulario con un solo producto vacío para el próximo plan
-    setProductForms([{ id: 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', costo: '' }]);
+    setProductForms([{ id: 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', tratamientos: '',  costo: '' }]);
   };
 
   // Al hacer click en + Agregar otro plan: muestra el formulario
@@ -82,7 +105,7 @@ const FertilizationPlanner = () => {
     datasets: [
       {
         label: 'Costo por ha',
-        data: plans.map(plan => 
+        data: plans.map(plan =>
           plan.productos.reduce((acc, prod) => acc + parseFloat(prod.costo || 0), 0)
         ),
         backgroundColor: ['#3B82F6', '#60A5FA', '#93C5FD', '#A78BFA', '#F472B6'],
@@ -104,34 +127,59 @@ const FertilizationPlanner = () => {
     const pdf = new jsPDF();
     let y = 10;
 
-    plans.forEach((plan, idx) => {
-      pdf.setFontSize(14);
-      pdf.text(`📄 ${plan.nombre}`, 10, y);
-      y += 8;
+    // Título de planes centrado
+    pdf.setFontSize(16);
+    const plansTitle = 'Planes de Fertilización';
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const textWidth = pdf.getTextWidth(plansTitle);
+    const plansX = (pageWidth - textWidth) / 2;
+    pdf.text(plansTitle, plansX, y);
 
-      plan.productos.forEach((prod, pIdx) => {
-        pdf.setFontSize(12);
-        pdf.text(`Producto ${pIdx + 1}:`, 10, y);
-        y += 6;
-        pdf.text(`- Producto: ${prod.producto}`, 12, y);
-        y += 6;
-        pdf.text(`- Unidad: ${prod.unidad}`, 12, y);
-        y += 6;
-        pdf.text(`- Dosis x ha: ${prod.dosis}`, 12, y);
-        y += 6;
-        pdf.text(`- Presentación: ${prod.presentacion}`, 12, y);
-        y += 6;
-        pdf.text(`- Precio por envase: $${prod.precio}`, 12, y);
-        y += 6;
-        pdf.text(`- Costo estimado: $${prod.costo}`, 12, y);
-        y += 8;
+    y += 10;
+    pdf.setFontSize(12);
+
+    // Cabeceras de la tabla
+    const headers = ['Producto', 'Unidad', 'Dosis x ha', 'Presentación', 'Precio', 'Tratamientos', 'Costo x ha'];
+
+    plans.forEach((plan) => {
+      pdf.text(plan.nombre, 10, y);
+      y += 5;
+
+      const planData = plan.productos.map(prod => [
+        prod.producto,
+        prod.unidad,
+        prod.dosis,
+        prod.presentacion,
+        `$${prod.precio}`,
+        prod.tratamientos,
+        `$${prod.costo}`
+      ]);
+
+      autoTable(pdf, {
+        head: [headers],
+        body: planData,
+        foot: [[{content: `Total: $${plan.total}`, colSpan: 7}]],
+        startY: y,
+        theme: 'grid',
+        headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0]},
+        bodyStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], halign: 'center'},
+        footStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], halign: 'center', fontSize: 12},
+        styles: {
+          lineWidth: 0.1,
+          lineColor: [0, 0, 0],
+        }
       });
 
-      if (y > 270 && idx < plans.length - 1) {
+      // Actualizar posición Y para la siguiente tabla
+      y = pdf.lastAutoTable.finalY + 10;
+
+      // Verificar si se necesita nueva página
+      if (y > 270) {
         pdf.addPage();
         y = 10;
       }
-    });
+
+    })
 
     // Agregar gráfico en nueva página
     if (chartRef.current) {
@@ -139,8 +187,14 @@ const FertilizationPlanner = () => {
       const canvas = await html2canvas(chartCanvas);
       const imgData = canvas.toDataURL('image/png');
       pdf.addPage();
-      pdf.setFontSize(14);
-      pdf.text('📊 Comparación Gráfica', 10, 10);
+
+      // Título del gráfico centrado
+      pdf.setFontSize(16);
+      const chartTitle = 'Gráfico de comparación de costos';
+      const chartTextWidth = pdf.getTextWidth(chartTitle);
+      const chartX = (pageWidth - chartTextWidth) / 2;
+      pdf.text(chartTitle, chartX, 10);
+      pdf.setFontSize(12);
       pdf.addImage(imgData, 'PNG', 10, 20, 180, 100);
     }
 
@@ -151,8 +205,8 @@ const FertilizationPlanner = () => {
   const isFormValid = plans.length >= 2;
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen font-sans">
-      <h1 className="text-3xl font-bold mb-6 text-center">
+    <div className="p-6 bg-gray-50 text-black min-h-screen w-screen font-sans">
+      <h1 className="text-3xl font-bold text-center">
         VISUALIZADOR DE COSTO <span className="text-gray-700">Fertilización</span>
       </h1>
 
@@ -162,10 +216,10 @@ const FertilizationPlanner = () => {
       {showForm && (
         <div className="border p-4 rounded mb-6 bg-white shadow">
           <h2 className="font-semibold text-lg mb-4">CARGA DE PRODUCTOS Y COSTOS</h2>
-          {productForms.map(({ id, producto, unidad, dosis, presentacion, precio, costo }) => (
+          {productForms.map(({ id, producto, unidad, dosis, presentacion, precio, tratamientos, costo }) => (
             <div key={id} className="grid grid-cols-6 gap-4 mb-4">
               <select
-                className="border p-2 rounded"
+                className="border border-black p-2 rounded"
                 value={producto}
                 onChange={e => handleInputChange(id, 'producto', e.target.value)}
               >
@@ -174,7 +228,7 @@ const FertilizationPlanner = () => {
                 <option value="fosfato">Fosfato</option>
               </select>
               <select
-                className="border p-2 rounded"
+                className="border border-black p-2 rounded"
                 value={unidad}
                 onChange={e => handleInputChange(id, 'unidad', e.target.value)}
               >
@@ -184,13 +238,13 @@ const FertilizationPlanner = () => {
               </select>
               <input
                 type="text"
-                className="border p-2 rounded"
+                className="border border-black p-2 rounded"
                 placeholder="Dosis x ha"
                 value={dosis}
                 onChange={e => handleInputChange(id, 'dosis', e.target.value)}
               />
               <select
-                className="border p-2 rounded"
+                className="border border-black p-2 rounded"
                 value={presentacion}
                 onChange={e => handleInputChange(id, 'presentacion', e.target.value)}
               >
@@ -200,17 +254,24 @@ const FertilizationPlanner = () => {
               </select>
               <input
                 type="text"
-                className="border p-2 rounded"
+                className="border border-black p-2 rounded"
                 placeholder="Precio por envase"
                 value={precio}
                 onChange={e => handleInputChange(id, 'precio', e.target.value)}
               />
+              <input 
+                type="text"
+                className="border border-black p-2 rounded"
+                placeholder="Tratamientos"
+                value={tratamientos}
+                onChange={e => handleInputChange(id, 'tratamientos', e.target.value)}
+              />
               <input
                 type="text"
-                className="border p-2 rounded"
-                placeholder="Costo estimado"
+                className="border border-black p-2 rounded"
+                placeholder="Costo p/ha"
                 value={costo}
-                onChange={e => handleInputChange(id, 'costo', e.target.value)}
+                readOnly
               />
             </div>
           ))}
@@ -242,10 +303,11 @@ const FertilizationPlanner = () => {
             <ul className="list-disc pl-5">
               {plan.productos.map((prod, pIdx) => (
                 <li key={pIdx}>
-                  {prod.producto} - {prod.unidad} - Dosis: {prod.dosis} - {prod.presentacion} - Precio: ${prod.precio} - Costo: ${prod.costo}
+                  {prod.producto} - {prod.unidad} - Dosis: {prod.dosis} - {prod.presentacion} - Precio: ${prod.precio} - Tratamientos: {prod.tratamientos} - Costo: ${prod.costo}
                 </li>
               ))}
             </ul>
+            <strong>Total: ${plan.total}</strong>
           </div>
         ))}
 
@@ -281,7 +343,7 @@ const FertilizationPlanner = () => {
         )}
       </div>
 
-    
+
     </div>
   );
 };
