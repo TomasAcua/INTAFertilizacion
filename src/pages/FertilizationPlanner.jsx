@@ -11,13 +11,16 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
-import { autoTable } from 'jspdf-autotable';
+
+import useGeneradorPDF from '../hooks/useGeneradorPDF/useGeneradorPDF'
+
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
 const FertilizationPlanner = () => {
+
+  const { downloadPDF } = useGeneradorPDF()
+
   // Estado para manejar múltiples productos dentro de un plan (array de objetos)
   const [productForms, setProductForms] = useState([
     { id: 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', tratamientos: '', costo: '' }
@@ -120,92 +123,6 @@ const FertilizationPlanner = () => {
       legend: { position: 'top' },
       title: { display: true, text: 'Comparación de costos por plan' },
     },
-  };
-
-  // Descargar PDF con lista de planes y gráfico
-  const downloadPDF = async () => {
-    const pdf = new jsPDF();
-    let y = 10;
-
-    // Título de planes centrado
-    pdf.setFontSize(16);
-    const plansTitle = 'Planes de Fertilización';
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const textWidth = pdf.getTextWidth(plansTitle);
-    const plansX = (pageWidth - textWidth) / 2;
-    pdf.text(plansTitle, plansX, y);
-
-    y += 10;
-    pdf.setFontSize(12);
-
-    // Cabeceras de la tabla
-    const headers = ['Producto', 'Unidad', 'Dosis x ha', 'Presentación', 'Precio', 'Tratamientos', 'Costo x ha'];
-
-    plans.forEach((plan) => {
-      pdf.text(plan.nombre, 10, y);
-      y += 5;
-
-      const planData = plan.productos.map(prod => [
-        prod.producto,
-        prod.unidad,
-        prod.dosis,
-        prod.presentacion,
-        `$${prod.precio}`,
-        prod.tratamientos,
-        `$${prod.costo}`
-      ]);
-
-      autoTable(pdf, {
-        head: [headers],
-        body: planData,
-        foot: [[{ content: `Total: $${plan.total}`, colSpan: 7 }]],
-        startY: y,
-        theme: 'grid',
-        headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] },
-        bodyStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], halign: 'center' },
-        footStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], halign: 'center', fontSize: 12 },
-        styles: {
-          lineWidth: 0.1,
-          lineColor: [0, 0, 0],
-        }
-      });
-
-      // Actualizar posición Y para la siguiente tabla
-      y = pdf.lastAutoTable.finalY + 10;
-
-      // Verificar si se necesita nueva página
-      // if (y > 270) {
-      //   pdf.addPage();
-      //   y = 10;
-      // }
-
-    });
-
-    const espacioNecesario = 150 // sipongo hasta 190 queda en la misma pag
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    if (y + espacioNecesario > pageHeight) {
-      pdf.addPage()
-      y = 10
-    }
-
-    // Agregar gráfico y título en la posición y actual
-    if (chartRef.current) {
-      const chartCanvas = chartRef.current.canvas;
-      const canvas = await html2canvas(chartCanvas);
-      const imgData = canvas.toDataURL('image/png');
-
-      // Título del gráfico centrado
-      pdf.setFontSize(16);
-      const chartTitle = 'Gráfico de comparación de costos';
-      const chartTextWidth = pdf.getTextWidth(chartTitle);
-      const chartX = (pageWidth - chartTextWidth) / 2;
-      pdf.text(chartTitle, chartX, y);
-      y += 10; // espacio después del título
-      pdf.setFontSize(12);
-      pdf.addImage(imgData, 'PNG', 10, y, 180, 100);
-    }
-
-    pdf.save('Planes_Fertilizacion.pdf');
   };
 
   // Validar para mostrar gráfico y botón PDF: mínimo 2 planes
@@ -339,7 +256,7 @@ const FertilizationPlanner = () => {
               <Bar ref={chartRef} data={chartData} options={chartOptions} />
             </div>
             <button
-              onClick={downloadPDF}
+              onClick={() => downloadPDF(plans, chartRef)}
               className="mt-4 bg-sky-500/50 hover:bg-sky-500/100 text-white px-4 py-2 rounded"
             >
               Descargar PDF
