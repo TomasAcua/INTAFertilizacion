@@ -12,7 +12,7 @@ import {
   Legend
 } from 'chart.js';
 
-import useGeneradorPDF from '../hooks/useGeneradorPDF/useGeneradorPDF'
+import useGeneradorPDF from '../hooks/useGeneradorPDF'
 
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
