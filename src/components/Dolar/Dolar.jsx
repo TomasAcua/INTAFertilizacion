@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import useCalculoValor from "../../hooks/useCalculoValor"
 
 // si gustan pueden ignorar este custom hook, sigue siendo la misma lógica de siempre, sólo deja el componente más limpio
 
-const Dolar = () => {
+const Dolar = ({ onDolarChange }) => {
   const {
     dolarOficial,
     dolarActual,
@@ -13,6 +14,10 @@ const Dolar = () => {
     setCantDolar,
     cambiarEstado
   } = useCalculoValor()
+
+  useEffect(() => {
+    onDolarChange(dolarActual);
+  }, [dolarActual]);
 
   return (
     <div className="bg-green-600 text-white w-50">
