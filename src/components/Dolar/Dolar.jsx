@@ -51,43 +51,43 @@ const Dolar = ({ onDolarChange }) => {
           <input
             type="number"
             min="1"
-            className="w-full p-1 rounded"
+            className="w-full text-black p-1 rounded"
             value={cantDolar}
             onChange={e => setCantDolar(e.target.value)}
           />
         </div>
-        
+
         <div className="bg-green-300 p-2 mt-2 rounded">
           <label className="block text-black text-sm mb-1">
             Valor de dólar a usar (personalizado):
           </label>
-           
+
           <input
             type="number"
             min="1"
-            className="w-full p-1 rounded"
+            className="w-full text-black p-1 rounded"
             placeholder={dolarOficial ? dolarOficial : "Valor dólar"}
             value={value}
             onChange={e => setValue(e.target.value)}
             disabled={estado === "Restaurar"}
           />
-        
-       
+
+
           {/* acomodar estilos */}
-       
-  <button
-   className="flex-1 bg-green-600 hover:bg-green-800 text-white transition duration-200"
-    onClick={cambiarEstado}
-    disabled={estado === "Cambiar" && value === ""}
-  >
-    {estado}
-  </button>
+
+          <button
+            className="flex-1 bg-green-600 hover:bg-green-800 text-white transition duration-200"
+            onClick={cambiarEstado}
+            disabled={estado === "Cambiar" && value === ""}
+          >
+            {estado}
+          </button>
         </div>
 
-        </div>
-        <br />
       </div>
-    
+      <br />
+    </div>
+
   );
 };
 

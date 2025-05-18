@@ -11,13 +11,16 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
-import { autoTable }from 'jspdf-autotable';
+
+import useGeneradorPDF from '../hooks/useGeneradorPDF'
+
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
 const FertilizationPlanner = () => {
+
+  const { downloadPDF } = useGeneradorPDF()
+
   // Estado para manejar el valor del dólar
   const [currentDolarValue, setCurrentDolarValue] = useState(localStorage.getItem('dolarOficial') || 0);
 
@@ -25,7 +28,7 @@ const FertilizationPlanner = () => {
   const updateDolarValue = (newValue) => {
     setCurrentDolarValue(newValue);
   }
-  
+
   // Estado para manejar múltiples productos dentro de un plan (array de objetos)
   const [productForms, setProductForms] = useState([
     { id: 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', tratamientos: '', costo: '' }
@@ -50,7 +53,7 @@ const FertilizationPlanner = () => {
     const updatedForms = productForms.map(p => {
       if (p.id === id) {
         // Calcular costo si dosis, precio y tratamientos están completos
-        switch(field){
+        switch (field) {
           case 'dosis':
             if (value !== '' && p.precio !== '' && p.tratamientos !== '') {
               const costo = (parseFloat(value) * parseFloat(p.precio) * parseFloat(p.tratamientos)).toFixed(2);
@@ -70,7 +73,7 @@ const FertilizationPlanner = () => {
             }
             return { ...p, [field]: value, costo: '' };
         }
-        return { ...p, [field]: value};
+        return { ...p, [field]: value };
       }
       return p;
     });
@@ -99,7 +102,7 @@ const FertilizationPlanner = () => {
     setPlans([...plans, nuevoPlan]);
     setShowForm(false);
     // Reiniciar formulario con un solo producto vacío para el próximo plan
-    setProductForms([{ id: 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', tratamientos: '',  costo: '' }]);
+    setProductForms([{ id: 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', tratamientos: '', costo: '' }]);
   };
 
   // Al hacer click en + Agregar otro plan: muestra el formulario
@@ -130,102 +133,23 @@ const FertilizationPlanner = () => {
     },
   };
 
-  // Descargar PDF con lista de planes y gráfico
-  const downloadPDF = async () => {
-    const pdf = new jsPDF();
-    let y = 10;
-
-    // Título de planes centrado
-    pdf.setFontSize(16);
-    const plansTitle = 'Planes de Fertilización';
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const textWidth = pdf.getTextWidth(plansTitle);
-    const plansX = (pageWidth - textWidth) / 2;
-    pdf.text(plansTitle, plansX, y);
-
-    y += 10;
-    pdf.setFontSize(12);
-
-    // Cabeceras de la tabla
-    const headers = ['Producto', 'Unidad', 'Dosis x ha', 'Presentación', 'Precio', 'Tratamientos', 'Costo x ha'];
-
-    plans.forEach((plan) => {
-      pdf.text(plan.nombre, 10, y);
-      y += 5;
-
-      const planData = plan.productos.map(prod => [
-        prod.producto,
-        prod.unidad,
-        prod.dosis,
-        prod.presentacion,
-        `$${prod.precio}`,
-        prod.tratamientos,
-        `$${prod.costo}`
-      ]);
-
-      autoTable(pdf, {
-        head: [headers],
-        body: planData,
-        foot: [[{content: `Total: $${plan.total}`, colSpan: 7}]],
-        startY: y,
-        theme: 'grid',
-        headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0]},
-        bodyStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], halign: 'center'},
-        footStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], halign: 'center', fontSize: 12},
-        styles: {
-          lineWidth: 0.1,
-          lineColor: [0, 0, 0],
-        }
-      });
-
-      // Actualizar posición Y para la siguiente tabla
-      y = pdf.lastAutoTable.finalY + 10;
-
-      // Verificar si se necesita nueva página
-      if (y > 270) {
-        pdf.addPage();
-        y = 10;
-      }
-
-    })
-
-    // Agregar gráfico en nueva página
-    if (chartRef.current) {
-      const chartCanvas = chartRef.current.canvas;
-      const canvas = await html2canvas(chartCanvas);
-      const imgData = canvas.toDataURL('image/png');
-      pdf.addPage();
-
-      // Título del gráfico centrado
-      pdf.setFontSize(16);
-      const chartTitle = 'Gráfico de comparación de costos';
-      const chartTextWidth = pdf.getTextWidth(chartTitle);
-      const chartX = (pageWidth - chartTextWidth) / 2;
-      pdf.text(chartTitle, chartX, 10);
-      pdf.setFontSize(12);
-      pdf.addImage(imgData, 'PNG', 10, 20, 180, 100);
-    }
-
-    pdf.save('Planes_Fertilizacion.pdf');
-  };
-
   // Validar para mostrar gráfico y botón PDF: mínimo 2 planes
   const isFormValid = plans.length >= 2;
 
   return (
-    <div className="p-6 bg-gray-50 text-black min-h-screen w-screen font-sans">
+    <div className="p-6 bg-gray-50 text-black min-h-screen w-%100 font-sans">
       <h1 className="text-3xl font-bold text-center">
         VISUALIZADOR DE COSTO <span className="text-gray-700">Fertilización</span>
       </h1>
 
-      <Dolar onDolarChange={updateDolarValue}/>
+      <Dolar onDolarChange={updateDolarValue} />
 
       {/* Formulario de carga de productos */}
       {showForm && (
         <div className="border p-4 rounded mb-6 bg-white shadow">
           <h2 className="font-semibold text-lg mb-4">CARGA DE PRODUCTOS Y COSTOS</h2>
           {productForms.map(({ id, producto, unidad, dosis, presentacion, precio, tratamientos, costo }) => (
-            <div key={id} className="grid grid-cols-6 gap-4 mb-4">
+            <div key={id} className="grid grid-cols-7 gap-4 mb-4">
               <select
                 className="border border-black p-2 rounded"
                 value={producto}
@@ -267,7 +191,7 @@ const FertilizationPlanner = () => {
                 value={precio}
                 onChange={e => handleInputChange(id, 'precio', e.target.value)}
               />
-              <input 
+              <input
                 type="text"
                 className="border border-black p-2 rounded"
                 placeholder="Tratamientos"
@@ -343,7 +267,7 @@ const FertilizationPlanner = () => {
               <Bar ref={chartRef} data={chartData} options={chartOptions} />
             </div>
             <button
-              onClick={downloadPDF}
+              onClick={() => downloadPDF(plans, chartRef)}
               className="mt-4 bg-sky-500/50 hover:bg-sky-500/100 text-white px-4 py-2 rounded"
             >
               Descargar PDF
