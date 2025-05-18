@@ -52,15 +52,10 @@ const useGeneradorPDF = () => {
             // Actualizar posición Y para la siguiente tabla
             y = pdf.lastAutoTable.finalY + 10;
 
-            // Verificar si se necesita nueva página
-            // if (y > 270) {
-            //   pdf.addPage();
-            //   y = 10;
-            // }
-
         });
 
-        const espacioNecesario = 150 // sipongo hasta 190 queda en la misma pag
+        // calcular el height de la pagina, si chart mide 10px entonces podemos poner hasta 190 px como tope, ya 191px enviaria al grafico a otra hoja
+        const espacioNecesario = 150
         const pageHeight = pdf.internal.pageSize.getHeight()
         if (y + espacioNecesario > pageHeight) {
             pdf.addPage()
