@@ -6,8 +6,8 @@ import {
   LinearScale,
   Title,
   Tooltip,
-  Legend
-} from 'chart.js';
+  Legend,
+} from "chart.js";
 
 import useProductForm from '../hooks/useProductForm'
 import usePlanList from '../hooks/usePlanList'
@@ -67,9 +67,10 @@ const FertilizationPlanner = () => {
   };
 
   return (
-    <div className="p-6 bg-gray-50 text-black min-h-screen w-screen font-sans">
+    <div className="p-6 bg-gray-50 text-black min-h-screen w-%100 font-sans">
       <h1 className="text-3xl font-bold text-center">
-        VISUALIZADOR DE COSTO <span className="text-gray-700">Fertilización</span>
+        VISUALIZADOR DE COSTO{" "}
+        <span className="text-gray-700">Fertilización</span>
       </h1>
 
       <Dolar onDolarChange={updateDolarValue} />
