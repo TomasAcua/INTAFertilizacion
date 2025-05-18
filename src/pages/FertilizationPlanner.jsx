@@ -18,6 +18,14 @@ import { autoTable }from 'jspdf-autotable';
 ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
 const FertilizationPlanner = () => {
+  // Estado para manejar el valor del dólar
+  const [currentDolarValue, setCurrentDolarValue] = useState(localStorage.getItem('dolarOficial') || 0);
+
+  // Actualiza el valor del dólar en el estado
+  const updateDolarValue = (newValue) => {
+    setCurrentDolarValue(newValue);
+  }
+  
   // Estado para manejar múltiples productos dentro de un plan (array de objetos)
   const [productForms, setProductForms] = useState([
     { id: 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', tratamientos: '', costo: '' }
@@ -48,21 +56,21 @@ const FertilizationPlanner = () => {
               const costo = (parseFloat(value) * parseFloat(p.precio) * parseFloat(p.tratamientos)).toFixed(2);
               return { ...p, [field]: value, costo };
             }
-            break;
+            return { ...p, [field]: value, costo: '' };
           case 'precio':
             if (value !== '' && p.dosis !== '' && p.tratamientos !== '') {
               const costo = (parseFloat(p.dosis) * parseFloat(value) * parseFloat(p.tratamientos)).toFixed(2);
               return { ...p, [field]: value, costo };
             }
-            break;
+            return { ...p, [field]: value, costo: '' };
           case 'tratamientos':
             if (value !== '' && p.dosis !== '' && p.precio !== '') {
               const costo = (parseFloat(p.dosis) * parseFloat(p.precio) * parseFloat(value)).toFixed(2);
               return { ...p, [field]: value, costo };
             }
-            break;
+            return { ...p, [field]: value, costo: '' };
         }
-        return { ...p, [field]: value };
+        return { ...p, [field]: value};
       }
       return p;
     });
@@ -106,7 +114,7 @@ const FertilizationPlanner = () => {
       {
         label: 'Costo por ha',
         data: plans.map(plan =>
-          plan.productos.reduce((acc, prod) => acc + parseFloat(prod.costo || 0), 0)
+          plan.total
         ),
         backgroundColor: ['#3B82F6', '#60A5FA', '#93C5FD', '#A78BFA', '#F472B6'],
       },
@@ -210,7 +218,7 @@ const FertilizationPlanner = () => {
         VISUALIZADOR DE COSTO <span className="text-gray-700">Fertilización</span>
       </h1>
 
-      <Dolar />
+      <Dolar onDolarChange={updateDolarValue}/>
 
       {/* Formulario de carga de productos */}
       {showForm && (
@@ -307,7 +315,10 @@ const FertilizationPlanner = () => {
                 </li>
               ))}
             </ul>
-            <strong>Total: ${plan.total}</strong>
+            <div>
+              <p><strong>TOTAL</strong></p>
+              <p><strong>USD: ${plan.total.toFixed(2)} / ARS: ${(plan.total * currentDolarValue).toFixed(2)}</strong></p>
+            </div>
           </div>
         ))}
 
