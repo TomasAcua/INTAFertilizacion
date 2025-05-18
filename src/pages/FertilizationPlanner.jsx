@@ -13,7 +13,7 @@ import {
 } from 'chart.js';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { autoTable }from 'jspdf-autotable';
+import { autoTable } from 'jspdf-autotable';
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
@@ -42,7 +42,7 @@ const FertilizationPlanner = () => {
     const updatedForms = productForms.map(p => {
       if (p.id === id) {
         // Calcular costo si dosis, precio y tratamientos están completos
-        switch(field){
+        switch (field) {
           case 'dosis':
             if (value !== '' && p.precio !== '' && p.tratamientos !== '') {
               const costo = (parseFloat(value) * parseFloat(p.precio) * parseFloat(p.tratamientos)).toFixed(2);
@@ -91,7 +91,7 @@ const FertilizationPlanner = () => {
     setPlans([...plans, nuevoPlan]);
     setShowForm(false);
     // Reiniciar formulario con un solo producto vacío para el próximo plan
-    setProductForms([{ id: 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', tratamientos: '',  costo: '' }]);
+    setProductForms([{ id: 1, producto: '', unidad: '', dosis: '', presentacion: '', precio: '', tratamientos: '', costo: '' }]);
   };
 
   // Al hacer click en + Agregar otro plan: muestra el formulario
@@ -158,12 +158,12 @@ const FertilizationPlanner = () => {
       autoTable(pdf, {
         head: [headers],
         body: planData,
-        foot: [[{content: `Total: $${plan.total}`, colSpan: 7}]],
+        foot: [[{ content: `Total: $${plan.total}`, colSpan: 7 }]],
         startY: y,
         theme: 'grid',
-        headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0]},
-        bodyStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], halign: 'center'},
-        footStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], halign: 'center', fontSize: 12},
+        headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0] },
+        bodyStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], halign: 'center' },
+        footStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], halign: 'center', fontSize: 12 },
         styles: {
           lineWidth: 0.1,
           lineColor: [0, 0, 0],
@@ -174,28 +174,35 @@ const FertilizationPlanner = () => {
       y = pdf.lastAutoTable.finalY + 10;
 
       // Verificar si se necesita nueva página
-      if (y > 270) {
-        pdf.addPage();
-        y = 10;
-      }
+      // if (y > 270) {
+      //   pdf.addPage();
+      //   y = 10;
+      // }
 
-    })
+    });
 
-    // Agregar gráfico en nueva página
+    const espacioNecesario = 150 // sipongo hasta 190 queda en la misma pag
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    if (y + espacioNecesario > pageHeight) {
+      pdf.addPage()
+      y = 10
+    }
+
+    // Agregar gráfico y título en la posición y actual
     if (chartRef.current) {
       const chartCanvas = chartRef.current.canvas;
       const canvas = await html2canvas(chartCanvas);
       const imgData = canvas.toDataURL('image/png');
-      pdf.addPage();
 
       // Título del gráfico centrado
       pdf.setFontSize(16);
       const chartTitle = 'Gráfico de comparación de costos';
       const chartTextWidth = pdf.getTextWidth(chartTitle);
       const chartX = (pageWidth - chartTextWidth) / 2;
-      pdf.text(chartTitle, chartX, 10);
+      pdf.text(chartTitle, chartX, y);
+      y += 10; // espacio después del título
       pdf.setFontSize(12);
-      pdf.addImage(imgData, 'PNG', 10, 20, 180, 100);
+      pdf.addImage(imgData, 'PNG', 10, y, 180, 100);
     }
 
     pdf.save('Planes_Fertilizacion.pdf');
@@ -259,7 +266,7 @@ const FertilizationPlanner = () => {
                 value={precio}
                 onChange={e => handleInputChange(id, 'precio', e.target.value)}
               />
-              <input 
+              <input
                 type="text"
                 className="border border-black p-2 rounded"
                 placeholder="Tratamientos"
