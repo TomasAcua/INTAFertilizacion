@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react'
 
+/**
+ * Básicamente acá manejamos los useState y useEffect del componente PlanList.jsx
+ * @returns estados, handles, funciones necesarias
+ */
+
 const usePlanList = () => {
 
     // Estado para almacenar todos los planes con detalles de productos
@@ -20,6 +25,7 @@ const usePlanList = () => {
 
     const cleanPlans = () => {
         setPlans([]);
+        setShowForm(true)
     };
 
     const showAddPlanForm = () => {

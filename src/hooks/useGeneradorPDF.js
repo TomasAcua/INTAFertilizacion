@@ -2,6 +2,11 @@ import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import { autoTable } from 'jspdf-autotable'
 
+/**
+ * Toda la instancia de la libreria jsPDF se maneja acá
+ * @returns pdf
+ */
+
 const useGeneradorPDF = () => {
     const downloadPDF = async (plans, chartRef) => {
         const pdf = new jsPDF();

@@ -1,5 +1,10 @@
 import { useState, useEffect } from 'react';
 
+/**
+ * Básicamente acá manejamos los useState y useEffect del componente ProductForm.jsx
+ * @returns estados, handles, funciones necesarias
+ */
+
 const useProductForm = () => {
     // Valores por defecto para los errores de validación
     const defaultErrors = {

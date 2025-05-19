@@ -15,9 +15,16 @@ import useChartData from '../hooks/useChartData'
 import useGeneradorPDF from '../hooks/useGeneradorPDF'
 
 import Dolar from '../components/Dolar/Dolar'
-import ProductForm from '../components/ProductForm/ProductForms'
+import ProductForm from '../components/ProductForm/ProductForm'
 import PlanList from '../components/PlanList/PlanList'
 import Chart from '../components/Chart/Chart'
+
+/**
+ * Acá traemos la importacion de la lógica de los hooks y el renderizado de los componentes
+ * Si queremos agregar estilos y demás, vamos a los componentes y los pasamos por classname como siempre
+ * FALTA VER LO DEL DOLAR (linea 60 a 74) Y ALGUNAS COSITAS MAS
+ * El resto de compos están (boton, titulo y seguro falten algunos chiches más) pero falta agregarlos
+ */
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
 
