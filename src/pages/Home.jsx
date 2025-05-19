@@ -1,1 +1,0 @@
-// Para hacer un Home después de preparar todo y renderizar sólo los componentes

@@ -1,131 +1,143 @@
-import React, { useState } from "react";
-import { CircleX } from "lucide-react";
+import { Plus, CircleX } from 'lucide-react'
 
-const ProductForm = ({ id, producto, unidad, dosis, presentacion, precio, tratamientos, costo, errors,  onInputChange, onDeleteProduct }) => {
-
-    const productDeleteHandler = () => {
-        onDeleteProduct(id);
-    }
-
+const ProductForm = ({ productForms, handleInputChange, addProductForm, deleteProductForm, cleanProducts, handleCargarProductos }) => {
     return (
-        <div className="flex w-full gap-2 bg-slate-200 p-4 rounded w-56 relative">
-            <div className="flex flex-col gap-1 w-1/7">
-                <label htmlFor="producto" className="text-left">Producto</label>
-                <select
-                    name="producto"
-                    className="border border-black px-2 py-1 rounded"
-                    value={producto}
-                    onChange={(e) => {
-                        onInputChange(id, "producto", e.target.value);      
-                    }}
-                >
-                    <option value="" disabled></option>
-                    <option value="urea">Urea</option>
-                    <option value="fosfato">Fosfato</option>
-                </select>
-                {errors.producto && (
-                    <p className="text-left text-red-500 text-sm">{errors.producto}</p>
-                )}
-            </div>
-            
-            <div className="flex flex-col gap-1 w-1/7">
-                <label htmlFor="unidad" className="text-left">Unidad</label>
-                <select
-                    name="unidad"
-                    className="border border-black px-2 py-1 rounded"
-                    value={unidad}
-                    onChange={(e) => {
-                        onInputChange(id, "unidad", e.target.value);
-                    }}
-                >
-                    <option value="" disabled></option>
-                    <option value="kg">Kg</option>
-                    <option value="lts">Lts</option>
-                </select>
-                {errors.unidad && (
-                    <p className="text-left text-red-500 text-sm">{errors.unidad}</p>
-                )}
-            </div>
-            <div className="flex flex-col gap-1 w-1/7">
-                <label htmlFor="dosis" className="text-left">Dosis</label>
-                <input
-                    name="dosis"
-                    type="number"
-                    className="border border-black px-2 py-1 rounded"
-                    value={dosis}
-                    onChange={(e) => {
-                        onInputChange(id, "dosis", e.target.value);
-                    }}
-                />
-                {errors.dosis && (
-                    <p className="text-left text-red-500 text-sm">{errors.dosis}</p>
-                )}
-            </div>
-            <div className="flex flex-col gap-1 w-1/7">
-                <label htmlFor="presentacion" className="text-left">Presentación</label>
-                <select
-                    name="presentacion"
-                    className="border border-black px-2 py-1 rounded"
-                    value={presentacion}
-                    onChange={(e) => {
-                        onInputChange(id, "presentacion", e.target.value);
-                    }}
-                >
-                    <option value="" disabled></option>
-                    <option value="bolsa">Bolsa 50kg</option>
-                    <option value="bidon">Bidón 20lts</option>
-                </select>
-                {errors.presentacion && (
-                    <p className="text-left text-red-500 text-sm">{errors.presentacion}</p>
-                )}
-            </div>
-            <div className="flex flex-col gap-1 w-1/7">
-                <label htmlFor="precio" className="text-left">Precio p/envase</label>
-                <input
-                    name="precio"
-                    type="number"
-                    className="border border-black px-2 py-1 rounded"
-                    value={precio}
-                    step="0.01"
-                    onChange={(e) => {
-                        onInputChange(id, "precio", e.target.value);
-                    }}
-                />
-                {errors.precio && (
-                    <p className="text-left text-red-500 text-sm">{errors.precio}</p>
-                )}
-            </div>
-            <div className="flex flex-col gap-1 w-1/7">
-                <label htmlFor="tratamientos" className="text-left">Tratamientos</label>
-                <input
-                    name="tratamientos"
-                    type="number"
-                    className="border border-black px-2 py-1 rounded"
-                    value={tratamientos}
-                    step="1"
-                    onChange={(e) => {
-                        onInputChange(id, "tratamientos", e.target.value);
-                    }}
-                />
-                {errors.tratamientos && (
-                    <p className="text-left text-red-500 text-sm">{errors.tratamientos}</p>
-                )}
-            </div>
+        <div className="border p-4 rounded mb-6 bg-white shadow">
+            <h2 className="font-semibold text-lg mb-4">CARGA DE PRODUCTOS Y COSTOS</h2>
 
-            <div className="flex flex-col gap-1 w-1/7">
-                <label htmlFor="costo" className="text-left">Costo p/ha</label>
-                <input
-                    name="costo"
-                    type="number"
-                    className="border border-black px-2 py-1 rounded"
-                    value={costo}
-                    step="0.01"
-                    readOnly
-                />
+            {productForms.map((product) => (
+                <div key={product.id} className="mb-4 p-2 border rounded">
+                    <div className="grid grid-cols-3 gap-4 mb-2">
+                        <div>
+                            <label className="block text-sm">Producto</label>
+                            <select
+                                className={`w-full border p-2 rounded ${product.errors.producto ? 'border-red-500' : 'border-gray-300'}`}
+                                value={product.producto}
+                                onChange={e => handleInputChange(product.id, 'producto', e.target.value)}
+                            >
+                                <option value="" disabled>Seleccionar</option>
+                                <option value="urea">Urea</option>
+                                <option value="fosfato">Fosfato</option>
+                                {/* Agregar más opciones según sea necesario */}
+                            </select>
+                            {product.errors.producto && <p className="text-red-500 text-xs">{product.errors.producto}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm">Unidad</label>
+                            <select
+                                className={`w-full border p-2 rounded ${product.errors.unidad ? 'border-red-500' : 'border-gray-300'}`}
+                                value={product.unidad}
+                                onChange={e => handleInputChange(product.id, 'unidad', e.target.value)}
+                            >
+                                <option value="" disabled>Seleccionar</option>
+                                <option value="kg">Kg</option>
+                                <option value="lts">Lts</option>
+                            </select>
+                            {product.errors.unidad && <p className="text-red-500 text-xs">{product.errors.unidad}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm">Dosis x ha</label>
+                            <input
+                                type="text"
+                                className={`w-full border p-2 rounded ${product.errors.dosis ? 'border-red-500' : 'border-gray-300'}`}
+                                placeholder="Dosis"
+                                value={product.dosis}
+                                onChange={e => handleInputChange(product.id, 'dosis', e.target.value)}
+                            />
+                            {product.errors.dosis && <p className="text-red-500 text-xs">{product.errors.dosis}</p>}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4 mb-2">
+                        <div>
+                            <label className="block text-sm">Presentación</label>
+                            <select
+                                className={`w-full border p-2 rounded ${product.errors.presentacion ? 'border-red-500' : 'border-gray-300'}`}
+                                value={product.presentacion}
+                                onChange={e => handleInputChange(product.id, 'presentacion', e.target.value)}
+                            >
+                                <option value="" disabled>Seleccionar</option>
+                                <option value="bolsa">Bolsa 50kg</option>
+                                <option value="bidon">Bidón 20lts</option>
+                            </select>
+                            {product.errors.presentacion && <p className="text-red-500 text-xs">{product.errors.presentacion}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm">Precio por envase</label>
+                            <input
+                                type="text"
+                                className={`w-full border p-2 rounded ${product.errors.precio ? 'border-red-500' : 'border-gray-300'}`}
+                                placeholder="Precio"
+                                value={product.precio}
+                                onChange={e => handleInputChange(product.id, 'precio', e.target.value)}
+                            />
+                            {product.errors.precio && <p className="text-red-500 text-xs">{product.errors.precio}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm">Tratamientos</label>
+                            <input
+                                type="text"
+                                className={`w-full border p-2 rounded ${product.errors.tratamientos ? 'border-red-500' : 'border-gray-300'}`}
+                                placeholder="Tratamientos"
+                                value={product.tratamientos}
+                                onChange={e => handleInputChange(product.id, 'tratamientos', e.target.value)}
+                            />
+                            {product.errors.tratamientos && <p className="text-red-500 text-xs">{product.errors.tratamientos}</p>}
+                        </div>
+                    </div>
+
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <label className="block text-sm">Costo por ha</label>
+                            <input
+                                type="text"
+                                className="w-full border p-2 rounded bg-gray-100"
+                                value={product.costo ? `$${product.costo}` : ''}
+                                readOnly
+                            />
+                        </div>
+
+                        {productForms.length > 1 && (
+                            <button
+                                onClick={() => deleteProductForm(product.id)}
+                                className="text-red-500 hover:text-red-700"
+                            >
+                                <CircleX size={18} />
+                            </button>
+                        )}
+                    </div>
+                </div>
+            ))}
+
+            <div className="flex gap-2 mt-4">
+                <button
+                    onClick={addProductForm}
+                    className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                >
+                    <Plus size={16} />
+                    <span>Añadir producto</span>
+                </button>
+
+                <button
+                    onClick={handleCargarProductos}
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded"
+                >
+                    Cargar Plan
+                </button>
+
+                <button
+                    onClick={cleanProducts}
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded"
+                >
+                    Limpiar
+                </button>
             </div>
-            <CircleX size={24} color="#000" className="absolute top-2 right-2 cursor-pointer" onClick={productDeleteHandler}/>
         </div>
     );
-}
+};
 
-export default ProductForm;
+export default ProductForm
