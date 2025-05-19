@@ -76,7 +76,7 @@ const Dolar = ({ onDolarChange }) => {
           {/* acomodar estilos */}
 
           <button
-            className="flex-1 bg-green-600 hover:bg-green-800 text-white transition duration-200"
+            className="flex-1 bg-white hover:bg-green-800 text-[#000000]  hover:text-[#EEEEEE] transition duration-200"
             onClick={cambiarEstado}
             disabled={estado === "Cambiar" && value === ""}
           >

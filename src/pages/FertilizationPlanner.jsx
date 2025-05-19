@@ -311,9 +311,9 @@ const FertilizationPlanner = () => {
               onDeleteProduct={deleteProductForm}
             ></ProductForm>
           ))}
-          <div className="w-full flex justify-start items-center">
+          <div className="w-full flex justify-start  items-center">
             <button
-            className="text-white flex items-center justify-center gap-1 cursor-pointer"
+            className="bg-[#1B2830] hover:bg-[#0089A9] text-white flex items-center justify-center gap-1 cursor-pointer"
             onClick={addProductForm}
             >
               <Plus size={20} color="#ffffff" />
@@ -321,10 +321,10 @@ const FertilizationPlanner = () => {
             </button>
           </div>
           <div className="w-full flex justify-center items-center gap-5">
-            <button className="text-white" onClick={checkForms}>
+            <button className="bg-[#1B2830] hover:bg-[#0089A9] text-white" onClick={checkForms}>
               Agregar plan
             </button>
-            <button className="text-white" onClick={cleanProducts}>
+            <button className="bg-[#1B2830] hover:bg-[#0089A9] text-white" onClick={cleanProducts}>
               Limpiar
             </button>
           </div>
