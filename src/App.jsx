@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import FertilizationPlanner from './pages/FertilizationPlanner';
 import Dolar from './components/Dolar/Dolar';
+import Home from './pages/Home';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -11,7 +12,7 @@ function App() {
   return (
     <>
       
-        <FertilizationPlanner />
+        <Home/>
       
     </>
   )
