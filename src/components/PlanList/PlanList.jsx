@@ -1,3 +1,5 @@
+import Button from "../Button/Button"
+
 const PlanList = ({ plans, onAddPlan, onCleanPlans, currentDolarValue }) => {
     return (
         <div className="border p-4 rounded bg-white shadow mb-6">
@@ -46,18 +48,18 @@ const PlanList = ({ plans, onAddPlan, onCleanPlans, currentDolarValue }) => {
                         </table>
                     ))}
                     <div className="flex gap-4">
-                        <button
+                        <Button
                             onClick={onAddPlan}
-                            className="text-blue-600 hover:underline"
+                            className="text-blue-600 bg-sky-100 hover:underline"
                         >
                             + Agregar otro plan
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             onClick={onCleanPlans}
-                            className="text-red-600 hover:underline"
+                            className="text-red-600 bg-red-100 hover:underline"
                         >
                             Limpiar planes
-                        </button>
+                        </Button>
                     </div>
                 </div>
             )}

@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import useCalculoValor from "../../hooks/useCalculoValor"
+import Button from "../Button/Button"
 
 // si gustan pueden ignorar este custom hook, sigue siendo la misma lógica de siempre, sólo deja el componente más limpio
 
@@ -75,13 +76,13 @@ const Dolar = ({ onDolarChange }) => {
 
           {/* acomodar estilos */}
 
-          <button
+          <Button
             className="flex-1 bg-green-600 hover:bg-green-800 text-white transition duration-200"
             onClick={cambiarEstado}
             disabled={estado === "Cambiar" && value === ""}
           >
             {estado}
-          </button>
+          </Button>
         </div>
 
       </div>

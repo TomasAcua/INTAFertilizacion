@@ -1,5 +1,6 @@
 import { Bar } from 'react-chartjs-2';
 import { BarChart2 } from 'lucide-react';
+import Button from "../Button/Button"
 
 const Chart = ({ isFormValid, chartData, chartOptions, chartRef, onDownloadPDF, plans }) => {
     return (
@@ -14,15 +15,15 @@ const Chart = ({ isFormValid, chartData, chartOptions, chartRef, onDownloadPDF, 
                     <div id="grafico" className="bg-white p-2">
                         <Bar ref={chartRef} data={chartData} options={chartOptions} />
                     </div>
-                    <button
+                    <Button
                         onClick={() => onDownloadPDF(plans, chartRef)}
-                        className="mt-4 bg-sky-500/50 hover:bg-sky-500/100 text-white px-4 py-2 rounded"
+                        className="mt-4 bg-sky-500 hover:bg-blue-500 text-white px-4 py-2 rounded"
                     >
                         Descargar PDF
-                    </button>
+                    </Button>
                 </>
             ) : (
-                <p className="text-gray-600">Agrega mas datos validos</p>
+                <p className="text-gray-600">Agrega 2 planes para la visualización gráfica</p>
             )}
         </div>
     )
