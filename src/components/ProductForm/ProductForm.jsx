@@ -1,4 +1,5 @@
 import { Plus, CircleX } from 'lucide-react'
+import Button from "../Button/Button"
 
 const ProductForm = ({ productForms, handleInputChange, addProductForm, deleteProductForm, cleanProducts, handleCargarProductos }) => {
     return (
@@ -102,39 +103,39 @@ const ProductForm = ({ productForms, handleInputChange, addProductForm, deletePr
                         </div>
 
                         {productForms.length > 1 && (
-                            <button
+                            <Button
                                 onClick={() => deleteProductForm(product.id)}
-                                className="text-red-500 hover:text-red-700"
+                                className="text-red-500 bg-red-100 hover:text-red-700"
                             >
                                 <CircleX size={18} />
-                            </button>
+                            </Button>
                         )}
                     </div>
                 </div>
             ))}
 
             <div className="flex gap-2 mt-4">
-                <button
+                <Button
                     onClick={addProductForm}
                     className="flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
                 >
                     <Plus size={16} />
                     <span>Añadir producto</span>
-                </button>
+                </Button>
 
-                <button
+                <Button
                     onClick={handleCargarProductos}
                     className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded"
                 >
                     Cargar Plan
-                </button>
+                </Button>
 
-                <button
+                <Button
                     onClick={cleanProducts}
                     className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-1 rounded"
                 >
                     Limpiar
-                </button>
+                </Button>
             </div>
         </div>
     );
